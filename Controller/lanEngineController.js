@@ -15,9 +15,9 @@ exports.translateWord = async (req, res, next) => {
         const result = await translate.translate(text, { from: source, to: target });
         // here we can avoid from language code, because google automaticaly detects it
 
-        res.send(result)
-
         const traslatedText = result[0]
+
+        res.json({fron:text,to:traslatedText})
 
         storeInDatabase(text, traslatedText)
 
@@ -31,7 +31,7 @@ async function storeInDatabase(from, to) {
     try {
         const result = await Dictionary.create({ from, to })
 
-        console.log(result)
+        // console.log(result)
     } catch (err) {
         console.log('==> from database insertion', err)
     }
@@ -54,9 +54,6 @@ exports.searchDb = async (req, res, next) => {
                 }
             })
             if (database_result) {
-                
-                // const from = database_result.from === text ? text : database_result.to;
-                // const to = database_result.to !== text ? database_result.from : text;
                 
                 if (database_result.from === text) {
                     res.json({from:text, to:database_result.to})
