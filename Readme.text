@@ -1,0 +1,9 @@
+
+-> whenever translate request hit the server that needs to follow these steps
+    
+    -->check the database whether the "text" (to be translate from) field is exist or not
+       
+        ---> if exists, return the value stored in db
+
+        ---> else translate the text and store the resultant in database
+                    to avoid repeated text translations

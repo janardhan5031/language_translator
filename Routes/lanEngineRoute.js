@@ -4,7 +4,7 @@ const Router = express.Router();
 const Controller = require('../Controller/lanEngineController');
 
 // controller 
-Router.post('/change',Controller.translateWord)
+Router.post('/change',Controller.searchDb , Controller.translateWord)
 
 
 module.exports = Router;
