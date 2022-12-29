@@ -1,25 +1,21 @@
-// Imports the Google Cloud client library
-const google_translate = require('google-translate')(process.env.API_KEY);
 
+const { Translate } = require('@google-cloud/translate').v2;
+
+// instantiate client
+const translate = new Translate()
 
 exports.translateWord = async (req, res, next) => {
-    const text = req.body.text;
-    const language = req.body.language;
+    const {text,source,target} = req.body;
 
     try {
         
-        google_translate.translate(text, language, (err, converted_Text) => {
-            
-            if (err) {
-                console.log(err)
-                res.send('please enter correct language code')
-                return;
-            }
-            console.log(converted_Text);
+        const result = await translate.translate(text, { from: source, to: target });
+        // here we can avoid from language code, because google automaticaly detects it
         
-            res.send(converted_Text);
-        })
+        console.log(result);
+        res.send(result)
     } catch (err) {
         console.log(err)
+        res.send('oops! pls provide currect language codes')
     }
 }
