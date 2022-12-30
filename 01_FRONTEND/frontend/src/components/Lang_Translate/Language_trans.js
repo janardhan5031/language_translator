@@ -1,11 +1,16 @@
-import { useState } from "react";
+import axios from 'axios';
+import { useEffect, useState } from "react";
+
 import { Row, Form, Stack, Button } from "react-bootstrap";
+
 import Options from "./Options";
 
 
 const Language_Translator = () => {
     const [isFromCodeValid, setIsFromCodeValid] = useState(false)
     const [isToCodeValid, setIsToCodeValid] = useState(false)
+    const [result,setResult] = useState('');
+
 
     function fromCodeChangeHandler(e) {
         const fromCode = e.target.value;
@@ -24,18 +29,33 @@ const Language_Translator = () => {
 
     }
 
-    const submitHandler = (e) => {
+    const submitHandler = async (e) => {
         e.preventDefault();
 
         // console.log(e.target.from_text.value ,e.target.from_code.value)
-        
+
         const from_text = e.target.from_text.value.trim();
         const from_code = e.target.from_code.value;
         const to_code = e.target.to_code.value;
 
         if (isFromCodeValid && isToCodeValid) {
-            console.log(from_code,to_code,from_text)
-        }   
+            // console.log(from_code,to_code,from_text)
+
+            try {
+                const response = await axios.post('http://localhost:5000/translate/change', {
+                    text: from_text,
+                    source: from_code,
+                    target: to_code
+                })
+                console.log(response);
+
+                setResult(response.data.to)
+
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
         else {
             window.alert('plaese select the languages to change')
         }
@@ -58,13 +78,13 @@ const Language_Translator = () => {
         </Row>
         <Row className="mb-3">
             <Stack direction='horizontal' gap={4}>
-                <Form.Control as="textarea" rows={8}  id='from_text'/>
-                <Form.Control as="textarea" rows={8} id='to_text' value='janiksdjf' readOnly/>
+                <Form.Control as="textarea" rows={8} id='from_text' />
+                <Form.Control as="textarea" rows={8} id='to_text' value={result} readOnly />
 
             </Stack>
         </Row>
         <Row className="mb-3">
-            <Button type='submit' style={{ width: '10rem',height:'3rem' }} className="m-auto">Convert</Button>
+            <Button type='submit' style={{ width: '10rem', height: '3rem' }} className="m-auto">Convert</Button>
         </Row>
     </Form>)
 }
