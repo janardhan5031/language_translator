@@ -15,6 +15,7 @@ exports.translateWord = async (req, res, next) => {
         const result = await translate.translate(text, { from: source, to: target });
         // here we can avoid from language code, because google automaticaly detects it
 
+        console.log(result)
         const traslatedText = result[0]
 
         res.json({fron:text,to:traslatedText})
