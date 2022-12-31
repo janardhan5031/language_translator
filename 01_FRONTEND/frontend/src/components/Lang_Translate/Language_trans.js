@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Row, Form, Stack, Button } from "react-bootstrap";
 
@@ -9,12 +9,14 @@ import Options from "./Options";
 const Language_Translator = () => {
     const [isFromCodeValid, setIsFromCodeValid] = useState(false)
     const [isToCodeValid, setIsToCodeValid] = useState(false)
-    const [result,setResult] = useState('');
+    const [result, setResult] = useState('');
+    
+    const [isLoading, setIsLoading] = useState(false);
 
 
     function fromCodeChangeHandler(e) {
         const fromCode = e.target.value;
-        console.log(fromCode)
+        // console.log(fromCode)
         if (fromCode !== 'from') {
             setIsFromCodeValid(true)
         }
@@ -40,14 +42,15 @@ const Language_Translator = () => {
 
         if (isFromCodeValid && isToCodeValid) {
             // console.log(from_code,to_code,from_text)
+            setIsLoading(true);
 
             try {
                 const response = await axios.post('http://localhost:5000/translate/change', {
-                    text: from_text,
-                    source: from_code,
-                    target: to_code
+                    sourceText: from_text,
+                    sourceLang: from_code,
+                    targetLang: to_code
                 })
-                console.log(response);
+                // console.log(response);
 
                 setResult(response.data.to)
 
@@ -55,6 +58,8 @@ const Language_Translator = () => {
             catch (err) {
                 console.log(err)
             }
+
+            setIsLoading(false);
         }
         else {
             window.alert('plaese select the languages to change')
@@ -84,7 +89,10 @@ const Language_Translator = () => {
             </Stack>
         </Row>
         <Row className="mb-3">
-            <Button type='submit' style={{ width: '10rem', height: '3rem' }} className="m-auto">Convert</Button>
+            <Button type='submit' style={{ width: '10rem', height: '3rem' }} className="m-auto">
+                {isLoading && 'Loading ...'}
+                {!isLoading && 'Convert'}
+            </Button>
         </Row>
     </Form>)
 }
