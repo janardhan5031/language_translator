@@ -8,8 +8,12 @@ const translationTable = db.define('translationTable', {
         allowNull: false,
         primaryKey: true
     },
-    from: sequelize.STRING,
-    to: sequelize.STRING
-});
+
+    sourceLang: sequelize.STRING,
+    sourceText: sequelize.STRING,
+    
+    targetLang: sequelize.STRING,
+    targetText:sequelize.STRING
+}); 
 
 module.exports = translationTable;

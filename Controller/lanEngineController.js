@@ -8,19 +8,20 @@ const { Translate } = require('@google-cloud/translate').v2;
 const translate = new Translate()
 
 exports.translateWord = async (req, res, next) => {
-    const { text, source, target } = req.body;
+    const { sourceText,sourceLang,targetLang } = req.body;
 
     try {
 
-        const result = await translate.translate(text, { from: source, to: target });
-        // here we can avoid from language code, because google automaticaly detects it
+        const result = await translate.translate(sourceText, {
+            from: sourceLang, to: targetLang
+        });
 
         console.log(result)
-        const traslatedText = result[0]
+        const targetText = result[0]
 
-        res.json({fron:text,to:traslatedText})
+        res.json({fron:sourceText,to:targetText})
 
-        storeInDatabase(text, traslatedText)
+        storeInDatabase(sourceText,sourceLang,targetText,targetLang)
 
     } catch (err) {
         console.log('==> from translation', err)
@@ -28,9 +29,14 @@ exports.translateWord = async (req, res, next) => {
     }
 }
 
-async function storeInDatabase(from, to) {
+async function storeInDatabase(sourceText,sourceLang,targetText,targetLang) {
     try {
-        const result = await Dictionary.create({ from, to })
+        const result = await Dictionary.create({
+            sourceLang,
+            sourceText,
+            targetLang,
+            targetText
+        })
 
         // console.log(result)
     } catch (err) {
@@ -41,27 +47,38 @@ async function storeInDatabase(from, to) {
 
 // search in db
 exports.searchDb = async (req, res, next) => {
-    const { text } = req.body;
+    const { sourceText,sourceLang,targetLang } = req.body;
     try {
 
-        if (req.body.source === req.body.target) {
+        // find match the source text from ( sourceText || targetText) in row
+        // find match the source lang from ( sourceLang || targetLang) in row
+        // find the target lang from (sourceLang || targetLang) in row
+
+        if (sourceLang===targetLang) {
             res.json({from:text,to:text,msg:'pls change any one translate language'})
         }
         else {
             
             const database_result = await Dictionary.findOne({
                 where: {
-                    [Op.or]: [{ from: text }, { to: text }]
+                    [Op.and]: [
+                        {[Op.or]: [{ sourceText }, { targetText: sourceText }]},
+                        {[Op.or]: [{ sourceLang }, { targetLang: sourceLang }]},
+                        {[Op.or]: [{ sourceLang: targetLang},{targetLang}]}
+                    ]
                 }
             })
             if (database_result) {
                 
-                if (database_result.from === text) {
-                    res.json({from:text, to:database_result.to})
+                if (database_result.sourceText === sourceText) {
+                    res.json({from:sourceText, to:database_result.targetText})
                 } else {
-                    res.json({from:database_result.to,to:database_result.from})
+                    res.json({
+                        from: database_result.targetText,
+                        to: database_result.sourceText,
+                        msg:'from database'
+                    })
                 }
-                
             } else {
                 next();
             }
